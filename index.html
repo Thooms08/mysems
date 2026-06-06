@@ -2,113 +2,974 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MYSEMS.MY.ID</title>
-  <!-- Bootstrap 5 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MYSEMS.MY.ID — Manajemen Event Sekolah</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-  <!-- Custom CSS -->
+
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --c1: #0a0f1e;
+      --c2: #0d1935;
+      --accent: #00d4ff;
+      --accent2: #7c3aed;
+      --accent3: #f59e0b;
+      --text: #e8edf8;
+      --muted: #7a8ba8;
+      --glass: rgba(255,255,255,0.04);
+      --glass-border: rgba(255,255,255,0.08);
+    }
+
+    html { scroll-behavior: smooth; }
+
     body {
-      background: linear-gradient(135deg, #0d6efd, #1e3c72);
-      color: #fff;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      height: 100vh;
+      background: var(--c1);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ── CANVAS BACKGROUND ── */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── GRID OVERLAY ── */
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ── NOISE TEXTURE ── */
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+
+    /* ── LAYOUT ── */
+    .page-wrapper {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
       display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid transparent;
+      transition: all 0.4s ease;
+    }
+
+    nav.scrolled {
+      background: rgba(10,15,30,0.85);
+      backdrop-filter: blur(20px);
+      border-color: var(--glass-border);
+    }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: 1px;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-logo .logo-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+      animation: pulse-dot 2s ease infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.3); }
+    }
+
+    .nav-badge {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid rgba(0,212,255,0.3);
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(0,212,255,0.06);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      overflow: hidden;
+      padding: 140px 24px 80px;
+      min-height: 100vh;
+      position: relative;
     }
-    .hero-text {
-      font-size: 2.8rem;
-      font-weight: bold;
-      letter-spacing: 2px;
-    }
-    .sub-text {
-      font-size: 1.2rem;
-      margin-top: 20px;
-      max-width: 700px;
-    }
-    .icon-row {
-      margin-top: 30px;
-    }
-    .icon-row i {
-      font-size: 2rem;
-      margin: 0 15px;
-      transition: transform 0.3s ease;
-    }
-    .icon-row i:hover {
-      transform: scale(1.3);
-      color: #ffc107;
-    }
-    .animated-circle {
+
+    /* Glow orbs */
+    .orb {
       position: absolute;
       border-radius: 50%;
-      opacity: 0.15;
+      filter: blur(80px);
+      pointer-events: none;
+      animation: orb-drift 8s ease-in-out infinite alternate;
+    }
+    .orb-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%);
+      top: -100px; left: -150px;
+      animation-duration: 10s;
+    }
+    .orb-2 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(0,212,255,0.15) 0%, transparent 70%);
+      bottom: -80px; right: -100px;
+      animation-duration: 12s;
+      animation-delay: -4s;
+    }
+    .orb-3 {
+      width: 350px; height: 350px;
+      background: radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%);
+      top: 40%; left: 60%;
+      animation-duration: 9s;
+      animation-delay: -2s;
+    }
+
+    @keyframes orb-drift {
+      from { transform: translate(0, 0) scale(1); }
+      to { transform: translate(40px, 30px) scale(1.1); }
+    }
+
+    /* Status pill */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,212,255,0.08);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 40px;
+      padding: 8px 18px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+      margin-bottom: 40px;
+      backdrop-filter: blur(10px);
+      animation: fadeSlideDown 0.8s ease both;
+    }
+
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse-dot 1.5s ease infinite;
+    }
+
+    /* Hero title */
+    .hero-eyebrow {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(0.7rem, 2vw, 0.85rem);
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+      animation: fadeSlideDown 0.8s 0.1s ease both;
+    }
+
+    .hero-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.8rem, 8vw, 6.5rem);
+      font-weight: 800;
+      line-height: 1.0;
+      letter-spacing: -2px;
+      margin-bottom: 28px;
+      animation: fadeSlideDown 0.8s 0.2s ease both;
+    }
+
+    .hero-title .word-mysems {
+      display: block;
+      background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-title .word-akan {
+      display: block;
+      font-size: 0.45em;
+      font-weight: 400;
+      letter-spacing: 0;
+      color: var(--muted);
+      -webkit-text-fill-color: var(--muted);
+      margin: 8px 0;
+    }
+
+    .hero-title .word-hadir {
+      display: block;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+    }
+
+    /* Animated underline on HADIR */
+    .hero-title .word-hadir::after {
+      content: '';
+      position: absolute;
+      bottom: 4px; left: 0;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 2px;
+      animation: line-grow 1.5s 1s ease both;
+      transform-origin: left;
+    }
+
+    @keyframes line-grow {
+      from { transform: scaleX(0); opacity: 0; }
+      to { transform: scaleX(1); opacity: 1; }
+    }
+
+    /* Hero description */
+    .hero-desc {
+      font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+      font-weight: 300;
+      line-height: 1.75;
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 52px;
+      animation: fadeSlideDown 0.8s 0.35s ease both;
+    }
+
+    .hero-desc strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* CTA area */
+    .hero-cta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 80px;
+      animation: fadeSlideDown 0.8s 0.45s ease both;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--accent2), #9b5de5);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 14px 30px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 30px rgba(124,58,237,0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(124,58,237,0.5);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--glass);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      font-size: 0.95rem;
+      padding: 13px 26px;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.16);
+      transform: translateY(-2px);
+    }
+
+    /* ── FEATURE CARDS ── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+      animation: fadeSlideUp 0.8s 0.6s ease both;
+    }
+
+    .feat-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 24px;
+      backdrop-filter: blur(12px);
+      transition: all 0.35s ease;
+      position: relative;
+      overflow: hidden;
+      text-align: left;
+    }
+
+    .feat-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.04), transparent);
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+
+    .feat-card:hover {
+      border-color: rgba(0,212,255,0.25);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,212,255,0.1);
+    }
+
+    .feat-card:hover::before { opacity: 1; }
+
+    .feat-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      margin-bottom: 14px;
+    }
+
+    .feat-icon.blue { background: rgba(0,212,255,0.12); color: var(--accent); }
+    .feat-icon.purple { background: rgba(124,58,237,0.15); color: #a78bfa; }
+    .feat-icon.amber { background: rgba(245,158,11,0.12); color: #fbbf24; }
+    .feat-icon.green { background: rgba(52,211,153,0.12); color: #34d399; }
+
+    .feat-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .feat-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: 60px 24px;
+      max-width: 700px;
+      margin: 0 auto;
+      animation: fadeSlideUp 0.8s 0.75s ease both;
+    }
+
+    .stat-item {
+      flex: 1;
+      text-align: center;
+      padding: 0 24px;
+    }
+
+    .stat-item + .stat-item {
+      border-left: 1px solid var(--glass-border);
+    }
+
+    .stat-number {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat-number span {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      border-top: 1px solid var(--glass-border);
+      font-size: 0.78rem;
+      color: var(--muted);
+      animation: fadeSlideUp 0.8s 0.9s ease both;
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── COUNTDOWN ── */
+    .countdown-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 48px;
+      animation: fadeSlideDown 0.8s 0.55s ease both;
+    }
+
+    .countdown-block {
+      text-align: center;
+      min-width: 64px;
+    }
+
+    .countdown-num {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 800;
+      color: var(--text);
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: block;
+      min-width: 64px;
+      backdrop-filter: blur(10px);
+      line-height: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .countdown-num::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 50%;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .countdown-unit {
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    .countdown-sep {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-top: -12px;
+      opacity: 0.6;
+    }
+
+    /* Notify input */
+    .notify-form {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      max-width: 420px;
+      width: 100%;
+      margin: 0 auto 16px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px);
+      transition: border-color 0.3s ease;
+    }
+
+    .notify-form:focus-within {
+      border-color: rgba(0,212,255,0.35);
+      box-shadow: 0 0 0 3px rgba(0,212,255,0.08);
+    }
+
+    .notify-input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      padding: 14px 18px;
+    }
+
+    .notify-input::placeholder { color: var(--muted); }
+
+    .notify-btn {
+      background: linear-gradient(135deg, var(--accent2), #6d28d9);
+      border: none;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 0.85rem;
+      padding: 14px 22px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .notify-btn:hover { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+
+    .notify-note {
+      font-size: 0.73rem;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    /* ── KEYFRAMES ── */
+    @keyframes fadeSlideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 16px 20px; }
+      .nav-badge { display: none; }
+      .hero { padding: 120px 20px 60px; }
+      .orb { display: none; }
+      .feature-grid { grid-template-columns: 1fr 1fr; }
+      .stats-row { gap: 0; padding: 40px 16px; }
+      .stat-item { padding: 0 12px; }
+      .countdown-wrap { gap: 8px; }
+      .countdown-block { min-width: 52px; }
+      .countdown-num { min-width: 52px; padding: 8px 10px; }
+    }
+
+    @media (max-width: 480px) {
+      .feature-grid { grid-template-columns: 1fr; }
+      .hero-cta { flex-direction: column; align-items: stretch; }
+      .btn-primary, .btn-secondary { justify-content: center; }
+      .stats-row { flex-wrap: wrap; gap: 24px; }
+      .stat-item + .stat-item { border-left: none; }
+      .countdown-sep { display: none; }
+      .notify-form { flex-direction: column; border-radius: 14px; }
+      .notify-input { width: 100%; }
+      .notify-btn { width: 100%; justify-content: center; border-radius: 0 0 12px 12px; }
+    }
+
+    /* Floating decorative hex */
+    .hex-deco {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0.04;
+      font-size: 8rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      color: #fff;
+      user-select: none;
+      animation: hex-float 6s ease-in-out infinite alternate;
+    }
+    .hex-deco.h1 { top: 8%; right: 5%; font-size: clamp(4rem, 10vw, 9rem); animation-delay: 0s; }
+    .hex-deco.h2 { bottom: 15%; left: 3%; font-size: clamp(3rem, 7vw, 6rem); animation-delay: -3s; }
+
+    @keyframes hex-float {
+      from { transform: translateY(0) rotate(-5deg); }
+      to { transform: translateY(-20px) rotate(5deg); }
+    }
+
+    /* Scroll indicator */
+    .scroll-hint {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      animation: fade-hint 3s 2s ease both;
+    }
+
+    @keyframes fade-hint {
+      0% { opacity: 0; }
+      30% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 36px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      animation: scroll-line 1.5s ease-in-out infinite;
+    }
+
+    @keyframes scroll-line {
+      0% { transform: scaleY(0); transform-origin: top; opacity: 1; }
+      50% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+      51% { transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="hero-text" id="mainText">
-      <i class="fa-solid fa-bolt"></i> MYSEMS.MY.ID akan hadir <i class="fa-solid fa-bolt"></i>
-    </div>
-    <div class="sub-text">
-      <i class="fa-solid fa-school"></i> MYSEMS adalah aplikasi web manajemen event sekolah yang terintegrasi dan mudah digunakan, 
-      dikhususkan untuk organisasi, sekolah, dan instansi di Indonesia. <i class="fa-solid fa-users"></i>
-    </div>
-    <div class="icon-row">
-      <i class="fa-solid fa-calendar-days"></i>
-      <i class="fa-solid fa-chalkboard-teacher"></i>
-      <i class="fa-solid fa-network-wired"></i>
-      <i class="fa-solid fa-laptop-code"></i>
-    </div>
+
+  <canvas id="bg-canvas"></canvas>
+  <div class="grid-overlay"></div>
+  <div class="noise"></div>
+
+  <div class="page-wrapper">
+
+    <!-- NAVBAR -->
+    <nav id="navbar">
+      <a href="#" class="nav-logo">
+        <div class="logo-dot"></div>
+        MYSEMS
+      </a>
+      <span class="nav-badge">Segera Hadir</span>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+      <div class="hex-deco h1">✦</div>
+      <div class="hex-deco h2">◈</div>
+
+      <!-- Status -->
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        Dalam Pengembangan Aktif
+      </div>
+
+      <!-- Eyebrow -->
+      <p class="hero-eyebrow">School Event Management System</p>
+
+      <!-- Title -->
+      <h1 class="hero-title">
+        <span class="word-mysems">MYSEMS</span>
+        <span class="word-akan">akan</span>
+        <span class="word-hadir">Hadir.</span>
+      </h1>
+
+      <!-- Desc -->
+      <p class="hero-desc">
+        Platform manajemen event sekolah yang <strong>terintegrasi & cerdas</strong> —
+        dirancang khusus untuk organisasi, sekolah, dan instansi di Indonesia.
+        Satu platform untuk semua kebutuhan acaramu.
+      </p>
+
+      <!-- Countdown -->
+      <div class="countdown-wrap">
+        <div class="countdown-block">
+          <span class="countdown-num" id="days">00</span>
+          <div class="countdown-unit">Hari</div>
+        </div>
+        <div class="countdown-sep">:</div>
+        <div class="countdown-block">
+          <span class="countdown-num" id="hours">00</span>
+          <div class="countdown-unit">Jam</div>
+        </div>
+        <div class="countdown-sep">:</div>
+        <div class="countdown-block">
+          <span class="countdown-num" id="minutes">00</span>
+          <div class="countdown-unit">Menit</div>
+        </div>
+        <div class="countdown-sep">:</div>
+        <div class="countdown-block">
+          <span class="countdown-num" id="seconds">00</span>
+          <div class="countdown-unit">Detik</div>
+        </div>
+      </div>
+
+      <!-- Notify -->
+      <div class="notify-form" role="form" aria-label="Form notifikasi peluncuran">
+        <input type="email" class="notify-input" placeholder="Masukkan email kamu..." aria-label="Email">
+        <button class="notify-btn" onclick="handleNotify(event)">
+          <i class="fa-solid fa-bell fa-xs"></i> Beritahu Saya
+        </button>
+      </div>
+      <p class="notify-note"><i class="fa-solid fa-shield-halved" style="color: var(--accent); margin-right:4px; font-size:0.7rem;"></i>Tidak ada spam. Kamu bisa berhenti kapan saja.</p>
+
+      <!-- Feature Cards -->
+      <div class="feature-grid" role="list">
+
+        <div class="feat-card" role="listitem">
+          <div class="feat-icon blue"><i class="fa-solid fa-calendar-check"></i></div>
+          <div class="feat-title">Manajemen Event</div>
+          <p class="feat-desc">Buat, kelola, dan pantau seluruh event sekolah dalam satu dasbor terpadu.</p>
+        </div>
+
+        <div class="feat-card" role="listitem">
+          <div class="feat-icon purple"><i class="fa-solid fa-users-gear"></i></div>
+          <div class="feat-title">Koordinasi Tim</div>
+          <p class="feat-desc">Penugasan panitia dan kolaborasi real-time tanpa kebingungan komunikasi.</p>
+        </div>
+
+        <div class="feat-card" role="listitem">
+          <div class="feat-icon amber"><i class="fa-solid fa-chart-line"></i></div>
+          <div class="feat-title">Laporan & Analitik</div>
+          <p class="feat-desc">Pantau progres dan hasilkan laporan profesional dalam hitungan detik.</p>
+        </div>
+
+        <div class="feat-card" role="listitem">
+          <div class="feat-icon green"><i class="fa-solid fa-mobile-screen-button"></i></div>
+          <div class="feat-title">Akses Multi-Platform</div>
+          <p class="feat-desc">Responsif sempurna di desktop, tablet, maupun ponsel kapan saja dan di mana saja.</p>
+        </div>
+
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row" role="list">
+        <div class="stat-item" role="listitem">
+          <div class="stat-number"><span>100%</span></div>
+          <div class="stat-label">Gratis untuk Sekolah</div>
+        </div>
+        <div class="stat-item" role="listitem">
+          <div class="stat-number"><span id="counter-events">0</span>+</div>
+          <div class="stat-label">Tipe Event Didukung</div>
+        </div>
+        <div class="stat-item" role="listitem">
+          <div class="stat-number"><span>24/7</span></div>
+          <div class="stat-label">Akses & Dukungan</div>
+        </div>
+      </div>
+
+      <!-- Scroll hint -->
+      <div class="scroll-hint">
+        <div class="scroll-line"></div>
+        Scroll
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>© 2025 <a href="#">MYSEMS.MY.ID</a> — Dibuat dengan <i class="fa-solid fa-heart" style="color:#f43f5e; font-size:0.75rem;"></i> untuk Pendidikan Indonesia</p>
+    </footer>
+
   </div>
 
-  <!-- Anime.js -->
+  <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
   <script>
-    // Animasi teks looping
-    anime({
-      targets: '#mainText',
-      scale: [0.95, 1.05],
-      duration: 2000,
-      easing: 'easeInOutSine',
-      direction: 'alternate',
-      loop: true
+    // ── NAVBAR SCROLL ──
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 30);
     });
 
-    // Animasi background lingkaran
-    for (let i = 0; i < 12; i++) {
-      let circle = document.createElement('div');
-      circle.classList.add('animated-circle');
-      document.body.appendChild(circle);
+    // ── CANVAS PARTICLE NETWORK ──
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, particles = [], mouse = { x: -9999, y: -9999 };
 
-      let size = Math.random() * 150 + 50;
-      circle.style.width = size + 'px';
-      circle.style.height = size + 'px';
-      circle.style.background = 'rgba(255,255,255,0.1)';
-      circle.style.top = Math.random() * window.innerHeight + 'px';
-      circle.style.left = Math.random() * window.innerWidth + 'px';
-
-      anime({
-        targets: circle,
-        translateY: [
-          { value: -40, duration: 2000 },
-          { value: 40, duration: 2000 }
-        ],
-        translateX: [
-          { value: -40, duration: 2000 },
-          { value: 40, duration: 2000 }
-        ],
-        direction: 'alternate',
-        loop: true,
-        easing: 'easeInOutQuad',
-        delay: i * 150
-      });
+    function resizeCanvas() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
     }
+    resizeCanvas();
+    window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+    window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+    function initParticles() {
+      const count = Math.min(Math.floor((W * H) / 14000), 80);
+      particles = Array.from({ length: count }, () => ({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        size: Math.random() * 1.5 + 0.5,
+        opacity: Math.random() * 0.5 + 0.2
+      }));
+    }
+    initParticles();
+
+    function drawParticles() {
+      ctx.clearRect(0, 0, W, H);
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+
+        // Mouse repel
+        const dx = p.x - mouse.x, dy = p.y - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          const force = (120 - dist) / 120;
+          p.x += (dx / dist) * force * 1.5;
+          p.y += (dy / dist) * force * 1.5;
+        }
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0,212,255,${p.opacity})`;
+        ctx.fill();
+      });
+
+      // Connect nearby
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < 120) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(0,212,255,${0.12 * (1 - d / 120)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(drawParticles);
+    }
+    drawParticles();
+
+    // ── COUNTDOWN ──
+    const launchDate = new Date();
+    launchDate.setDate(launchDate.getDate() + 87);
+    launchDate.setHours(0, 0, 0, 0);
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function updateCountdown() {
+      const now = new Date();
+      let diff = launchDate - now;
+      if (diff < 0) diff = 0;
+      const days    = Math.floor(diff / 86400000);
+      const hours   = Math.floor((diff % 86400000) / 3600000);
+      const minutes = Math.floor((diff % 3600000) / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      document.getElementById('days').textContent    = pad(days);
+      document.getElementById('hours').textContent   = pad(hours);
+      document.getElementById('minutes').textContent = pad(minutes);
+      document.getElementById('seconds').textContent = pad(seconds);
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    // ── COUNTER ANIMATION ──
+    anime({ targets: { val: 0 }, val: 20, round: 1, duration: 2500, easing: 'easeOutExpo',
+      update(anim) { document.getElementById('counter-events').textContent = Math.round(anim.animations[0].currentValue); } });
+
+    // ── FEATURE CARD HOVER TILT ──
+    document.querySelectorAll('.feat-card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = `translateY(-4px) rotateX(${-y * 6}deg) rotateY(${x * 6}deg)`;
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+        card.style.transition = 'all 0.4s ease';
+        setTimeout(() => card.style.transition = '', 400);
+      });
+      card.style.transformStyle = 'preserve-3d';
+      card.style.willChange = 'transform';
+    });
+
+    // ── NOTIFY HANDLER ──
+    function handleNotify(e) {
+      e.preventDefault();
+      const input = document.querySelector('.notify-input');
+      const btn   = document.querySelector('.notify-btn');
+      if (!input.value || !input.value.includes('@')) {
+        input.style.outline = '1px solid #f87171';
+        setTimeout(() => input.style.outline = '', 1500);
+        return;
+      }
+      btn.innerHTML = '<i class="fa-solid fa-check fa-xs"></i> Terdaftar!';
+      btn.style.background = 'linear-gradient(135deg, #059669, #10b981)';
+      input.value = '';
+      input.placeholder = 'Terima kasih! Kami akan menghubungi kamu.';
+      input.disabled = true;
+      btn.disabled = true;
+    }
+
+    // ── ANIME.JS entrance stagger ──
+    anime({
+      targets: '.feat-card',
+      opacity: [0, 1],
+      translateY: [30, 0],
+      delay: anime.stagger(100, { start: 800 }),
+      duration: 700,
+      easing: 'easeOutExpo'
+    });
   </script>
 </body>
 </html>
